@@ -1,4 +1,5 @@
 using CSharpClicker.Domain;
+using CSharpClicker.Infrastructure.Abstractions;
 using CSharpClicker.Infrastructure.DataAccess;
 using CSharpClicker.Initializers;
 using Microsoft.AspNetCore.Identity;
@@ -21,16 +22,16 @@ namespace CSharpClicker
 
             DbContextInitializer.InitializeDbContext(appDbContext);
 
-            //app.MapControllers();
+            app.UseRouting();
 
-            app.UseMvc();
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseSwagger();
             app.UseSwaggerUI();
 
-            app.MapGet("/", () => "Hello World!");
+            app.MapControllers();
+            app.MapDefaultControllerRoute();
             app.MapHealthChecks("health-check");
 
             app.Run();
@@ -40,11 +41,15 @@ namespace CSharpClicker
         {
             services.AddHealthChecks();
             services.AddSwaggerGen();
+
+            services.AddAutoMapper(typeof(Program).Assembly);
             services.AddMediatR(o => o.RegisterServicesFromAssembly(typeof(Program).Assembly));
+
             services.AddAuthentication();
             services.AddAuthorization();
-            services.AddMvcCore(o => o.EnableEndpointRouting = false)
-                .AddApiExplorer();
+            services.AddControllersWithViews();
+
+            services.AddScoped<IAppDbContext, AppDbContext>();
 
             IdentityInitializer.AddIdentity(services);
             DbContextInitializer.AddAppDbContext(services);

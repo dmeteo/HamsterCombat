@@ -1,36 +1,36 @@
 ﻿using CSharpClicker.Domain;
+using CSharpClicker.Infrastructure.Abstractions;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-namespace CSharpClicker.Infrastructure.DataAccess
+namespace CSharpClicker.Infrastructure.DataAccess;
+
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>, IAppDbContext
 {
-    public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, Guid>
+    public DbSet<ApplicationRole> ApplicationRoles { get; private set; }
+
+    public DbSet<ApplicationUser> ApplicationUsers { get; private set; }
+
+    public DbSet<Boost> Boosts { get; private set; }
+
+    public DbSet<UserBoost> UserBoosts { get; private set; }
+        
+    public AppDbContext(DbContextOptions options) : base(options) 
+    { 
+    }
+
+    protected override void OnModelCreating(ModelBuilder builder)
     {
-        public DbSet<ApplicationRole> ApplicationRoles { get; private set; }
+        base.OnModelCreating(builder);
+        
+        builder.Entity<UserBoost>()
+            .HasOne(ub => ub.User)
+            .WithMany()
+            .HasForeignKey(ub => ub.UserId);
 
-        public DbSet<ApplicationUser> ApplicationUsers { get; private set; }
-
-        public DbSet<Boost> Boosts { get; private set; }
-
-        public DbSet<UserBoost> UserBoosts { get; private set; }
-            
-        public AppDbContext(DbContextOptions options) : base(options) 
-        { 
-        }
-
-        protected override void OnModelCreating(ModelBuilder builder)
-        {
-            base.OnModelCreating(builder);
-            
-            builder.Entity<UserBoost>()
-                .HasOne(ub => ub.User)
-                .WithMany()
-                .HasForeignKey(ub => ub.UserId);
-
-            builder.Entity<UserBoost>()
-                .HasOne(ub => ub.Boost)
-                .WithMany()
-                .HasForeignKey(ub => ub.BoostId);
-        }
+        builder.Entity<UserBoost>()
+            .HasOne(ub => ub.Boost)
+            .WithMany()
+            .HasForeignKey(ub => ub.BoostId);
     }
 }

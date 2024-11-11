@@ -1,43 +1,86 @@
 ﻿using CSharpClicker.UseCases.Login;
 using CSharpClicker.UseCases.Logout;
 using CSharpClicker.UseCases.Register;
+using CSharpClicker.ViewModels;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
-namespace CSharpClicker.Controllers;
+namespace CSharpClicker.Web.Controllers;
 
 [Route("auth")]
 public class AuthController : Controller
 {
-    private readonly IMediator mediator;
+	private readonly IMediator mediator;
 
+	public AuthController(IMediator mediator)
+	{
+		this.mediator = mediator;
+	}
 
-    public AuthController(IMediator mediator)
-    {
-        this.mediator = mediator;
-    }
+	[HttpPost("register")]
+	public async Task<IActionResult> Register(RegisterCommand command)
+	{
+		try
+		{
+			await mediator.Send(command);
+		}
+		catch (ValidationException ex)
+		{
+			ModelState.AddModelError(string.Empty, ex.Message);
 
-    [HttpPost("register")]
-    public async Task<IActionResult> Register(RegisterCommand command)
-    {
-        await mediator.Send(command);
+			var viewModel = new AuthViewModel
+			{
+				UserName = command.UserName,
+				Password = command.Password,
+			};
 
-        return Ok();
-    }
+			return View(viewModel);
+		}
 
-    [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginCommand command)
-    {
-        await mediator.Send(command);
+		return RedirectToAction(nameof(Login));
+	}
 
-        return Ok();
-    }
+	[HttpGet("register")]
+	public IActionResult Register()
+	{
+		return View(new AuthViewModel());
+	}
 
-    [HttpPost("logout")]
-    public async Task<IActionResult> Logout(LogoutCommand command)
-    {
-        await mediator.Send(command);
+	[HttpPost("login")]
+	public async Task<IActionResult> Login(LoginCommand command)
+	{
+		try
+		{
+			await mediator.Send(command);
+		}
+		catch (ValidationException ex)
+		{
+			ModelState.AddModelError(string.Empty, ex.Message);
 
-        return Ok();
-    }
+			var viewModel = new AuthViewModel
+			{
+				UserName = command.UserName,
+				Password = command.Password,
+			};
+
+			return View(viewModel);
+		}
+
+		return RedirectToAction("Index", "Home");
+	}
+
+	[HttpGet("login")]
+	public IActionResult Login()
+	{
+		return View(new AuthViewModel());
+	}
+
+	[HttpPost("logout")]
+	public async Task<IActionResult> Logout(LogoutCommand command)
+	{
+		await mediator.Send(command);
+
+		return RedirectToAction("Login");
+	}
 }

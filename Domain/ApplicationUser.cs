@@ -8,6 +8,6 @@ namespace CSharpClicker.Domain
 
         public long RecordScore { get; set; }
 
-        public IEnumerable<UserBoost> UserBoosts { get; set; } = [];
+        public ICollection<UserBoost> UserBoosts { get; set; } = [];
     }
 }

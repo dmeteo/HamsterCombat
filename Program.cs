@@ -1,58 +1,62 @@
 using CSharpClicker.Domain;
 using CSharpClicker.Infrastructure.Abstractions;
 using CSharpClicker.Infrastructure.DataAccess;
+using CSharpClicker.Infrastructure.Implementations;
 using CSharpClicker.Initializers;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace CSharpClicker
 {
-    public class Program
-    {
-        public static void Main(string[] args)
-        {
-            var builder = WebApplication.CreateBuilder(args);
+	public class Program
+	{
+		public static void Main(string[] args)
+		{
+			var builder = WebApplication.CreateBuilder(args);
 
-            ConfigureServices(builder.Services);
+			ConfigureServices(builder.Services);
 
-            var app = builder.Build();
+			var app = builder.Build();
 
-            using var scope = app.Services.CreateScope();
-            using var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+			using var scope = app.Services.CreateScope();
+			using var appDbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            DbContextInitializer.InitializeDbContext(appDbContext);
+			DbContextInitializer.InitializeDbContext(appDbContext);
 
-            app.UseRouting();
+			app.UseRouting();
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+			app.UseAuthentication();
+			app.UseAuthorization();
 
-            app.UseSwagger();
-            app.UseSwaggerUI();
+			app.UseStaticFiles();
+			app.UseSwagger();
+			app.UseSwaggerUI();
 
-            app.MapControllers();
-            app.MapDefaultControllerRoute();
-            app.MapHealthChecks("health-check");
+			app.MapControllers();
+			app.MapDefaultControllerRoute();
+			app.MapHealthChecks("health-check");
 
-            app.Run();
-        }
+			app.Run();
+		}
 
-        private static void ConfigureServices(IServiceCollection services)
-        {
-            services.AddHealthChecks();
-            services.AddSwaggerGen();
+		private static void ConfigureServices(IServiceCollection services)
+		{
+			services.AddHealthChecks();
+			services.AddSwaggerGen();
 
-            services.AddAutoMapper(typeof(Program).Assembly);
-            services.AddMediatR(o => o.RegisterServicesFromAssembly(typeof(Program).Assembly));
+			services.AddAutoMapper(typeof(Program).Assembly);
+			services.AddMediatR(o => o.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
-            services.AddAuthentication();
-            services.AddAuthorization();
-            services.AddControllersWithViews();
+			services.AddAuthentication()
+				.AddCookie(o => o.LoginPath = "/auth/login");
+			services.AddAuthorization();
+			services.AddControllersWithViews();
 
-            services.AddScoped<IAppDbContext, AppDbContext>();
+			services.AddScoped<ICurrentUserAccessor, CurrentUserAccessor>();
+			services.AddScoped<IAppDbContext, AppDbContext>();
 
-            IdentityInitializer.AddIdentity(services);
-            DbContextInitializer.AddAppDbContext(services);
-        }
-    }
+			IdentityInitializer.AddIdentity(services);
+			DbContextInitializer.AddAppDbContext(services);
+		}
+	}
 }

@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CSharpClicker.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241109063904_Init")]
-    partial class Init
+    [Migration("20241216022341_MigrateDB")]
+    partial class MigrateDB
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -152,9 +152,6 @@ namespace CSharpClicker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("BoostId")
                         .HasColumnType("INTEGER");
 
@@ -168,8 +165,6 @@ namespace CSharpClicker.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BoostId");
 
@@ -279,10 +274,6 @@ namespace CSharpClicker.Migrations
 
             modelBuilder.Entity("CSharpClicker.Domain.UserBoost", b =>
                 {
-                    b.HasOne("CSharpClicker.Domain.ApplicationUser", null)
-                        .WithMany("UserBoosts")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("CSharpClicker.Domain.Boost", "Boost")
                         .WithMany()
                         .HasForeignKey("BoostId")
@@ -290,7 +281,7 @@ namespace CSharpClicker.Migrations
                         .IsRequired();
 
                     b.HasOne("CSharpClicker.Domain.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("UserBoosts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

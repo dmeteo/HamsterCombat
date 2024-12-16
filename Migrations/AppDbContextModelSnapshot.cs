@@ -149,9 +149,6 @@ namespace CSharpClicker.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("ApplicationUserId")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("BoostId")
                         .HasColumnType("INTEGER");
 
@@ -165,8 +162,6 @@ namespace CSharpClicker.Migrations
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
 
                     b.HasIndex("BoostId");
 
@@ -276,10 +271,6 @@ namespace CSharpClicker.Migrations
 
             modelBuilder.Entity("CSharpClicker.Domain.UserBoost", b =>
                 {
-                    b.HasOne("CSharpClicker.Domain.ApplicationUser", null)
-                        .WithMany("UserBoosts")
-                        .HasForeignKey("ApplicationUserId");
-
                     b.HasOne("CSharpClicker.Domain.Boost", "Boost")
                         .WithMany()
                         .HasForeignKey("BoostId")
@@ -287,7 +278,7 @@ namespace CSharpClicker.Migrations
                         .IsRequired();
 
                     b.HasOne("CSharpClicker.Domain.ApplicationUser", "User")
-                        .WithMany()
+                        .WithMany("UserBoosts")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();

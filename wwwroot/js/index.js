@@ -13,11 +13,36 @@ const profitPerClick = Number(profitPerClickElement.innerText);
 
 
 $(document).ready(function() {
-    var clickitem = document.getElementById("clickitem");
+    const clickitem = document.getElementById("clickitem");
 
     clickitem.onclick = click;
-    setInterval(addSecond, 1000)
+    setInterval(addSecond, 1000);
+
+    const boostButtons = document.getElementsByClassName("boost-button");
+
+    for (let i = 0; i < boostButtons.length; i++) {
+        const boostButton = boostButtons[i];
+
+        boostButton.onclick = () => boostButtonClick(boostButton);
+    }
 })
+
+function boostButtonClick(boostButton) {
+    const boostIdElement = boostButton.getElementsByClassName("boost-id")[0];
+    const boostId = boostIdElement.innerText;
+
+    buyBoost(boostId);
+}
+
+function buyBoost(boostId) {
+    $.ajax({
+        url: '/boost/buy',
+        method: 'post',
+        dataType: 'json',
+        data: { boostId: boostId },
+        success: onAddPointsSuccess(),
+    });
+}
 
 function addSecond() {
     seconds++;

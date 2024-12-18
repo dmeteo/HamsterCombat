@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace CSharpClicker.UseCases.BuyBoost;
 
-public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreDto>
+public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreBoostDto>
 {
     private readonly ICurrentUserAccessor currentUserAccessor;
     private readonly IAppDbContext appDbContext;
@@ -18,7 +18,7 @@ public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreDto>
         this.appDbContext = appDbContext;
     }
 
-    public async Task<ScoreDto> Handle(BuyBoostCommand request, CancellationToken cancellationToken)
+    public async Task<ScoreBoostDto> Handle(BuyBoostCommand request, CancellationToken cancellationToken)
     {
         var userId = currentUserAccessor.GetCurrentUserId();
         var user = await appDbContext.ApplicationUsers
@@ -29,15 +29,17 @@ public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreDto>
         var boost = await appDbContext.Boosts
             .FirstAsync(b => b.Id == request.BoostId);
 
-        var userBoost = user.UserBoosts.FirstOrDefault(ub => ub.BoostId == request.BoostId);
+        var existingUserBoost = user.UserBoosts.FirstOrDefault(ub => ub.BoostId == request.BoostId);
 
 
         var price = 0L;
-        if (userBoost != null)
+
+        UserBoost userBoost = existingUserBoost!;
+        if (existingUserBoost != null)
         {
-            price = userBoost.CurrentPrice;
-            userBoost.Quantity++;
-            userBoost.CurrentPrice = Convert.ToInt64(userBoost.CurrentPrice * Constants.BoostCostModifier);
+            price = existingUserBoost.CurrentPrice;
+            existingUserBoost.Quantity++;
+            existingUserBoost.CurrentPrice = Convert.ToInt64(existingUserBoost.CurrentPrice * Constants.BoostCostModifier);
         }
         else
         {
@@ -49,6 +51,8 @@ public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreDto>
                 Quantity = 1,
                 User = user,
             };
+
+            userBoost = newUserBoost;
             await appDbContext.UserBoosts.AddAsync(newUserBoost);
         }
 
@@ -61,12 +65,18 @@ public class BuyBoostCommandHandler : IRequestHandler<BuyBoostCommand, ScoreDto>
 
         await appDbContext.SaveChangesAsync();
 
-        return new ScoreDto
+        return new ScoreBoostDto
         {
-            CurrentScore = user.CurrentScore,
-            RecordScore = user.RecordScore,
-            ProfitPerClick = user.UserBoosts.GetProfit(),
-            ProfitPerSecond = user.UserBoosts.GetProfit(shouldCalculateAutoBoosts: true)
+            Score = new ScoreDto
+            {
+                CurrentScore = user.CurrentScore,
+                RecordScore = user.RecordScore,
+                ProfitPerClick = user.UserBoosts.GetProfit(),
+                ProfitPerSecond = user.UserBoosts.GetProfit(shouldCalculateAutoBoosts: true)
+            },
+            Price = userBoost.CurrentPrice,
+            Quantity = userBoost.Quantity,
+
         };
     }
 }

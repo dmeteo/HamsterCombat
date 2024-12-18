@@ -1,4 +1,5 @@
 ﻿using CSharpClicker.UseCases.AddPoints;
+using CSharpClicker.UseCases.Common;
 using CSharpClicker.UseCases.GetBoosts;
 using CSharpClicker.UseCases.GetCurrentUser;
 using CSharpClicker.ViewModels;
@@ -34,8 +35,6 @@ public class HomeController : Controller
     }
 
     [HttpPost("score")]
-    public async Task AddToScore(AddPointsCommand command)
-    {
-        await mediator.Send(command);
-    }
+    public async Task<ScoreDto> AddToScore(AddPointsCommand command)
+        => await mediator.Send(command);
 }

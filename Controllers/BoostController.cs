@@ -16,6 +16,6 @@ public class BoostController : ControllerBase
     }
 
     [HttpPost("buy")]
-    public async Task<ScoreDto> Buy(BuyBoostCommand command)
+    public async Task<ScoreBoostDto> Buy(BuyBoostCommand command)
         => await mediator.Send(command);
 }

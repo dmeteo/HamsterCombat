@@ -9,8 +9,10 @@ public class UserDto
 	public long RecordScore {  get; init; }
 	
 	public IReadOnlyCollection<UserBoostDto> UserBoosts { get; init; }
-	
-	public long ProfitPerClick { get; set; }
+
+    public byte[] Avatar { get; init; }
+
+    public long ProfitPerClick { get; set; }
 
 	public long ProfitPerSecond { get; set; }
 }

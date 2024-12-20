@@ -2,4 +2,4 @@
 
 namespace CSharpClicker.UseCases.GetLeaderboard;
 
-public class GetLeaderboardQuery : IRequest<LeaderboardDto>;
+public record GetLeaderboardQuery(int Page = 1) : IRequest<LeaderboardDto>;

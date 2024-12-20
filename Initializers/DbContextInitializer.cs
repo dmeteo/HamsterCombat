@@ -48,7 +48,39 @@ public static class DbContextInitializer
         AddBoostIfNotExist(Boost4, price: 10000, profit: 400);
         AddBoostIfNotExist(Boost5, price: 100000, profit: 5000, isAuto: true);
 
+        const int limit = 13000000;
+        const int asciiLimit = 127;
+        const int symbolsLimit = 15;
+        const int symbolsMin = 5;
+        var random = new Random();
+
+        AddRandomUser();
+
         appDbContext.SaveChanges();
+
+        void AddRandomUser()
+        {
+            return;
+
+            for (var i = 0; i < 200; i++)
+            {
+                var score = random.Next(limit);
+                var symbolsCount = random.Next(symbolsMin, symbolsLimit);
+
+                var userName = string.Empty;
+                for (var j = 0; j < symbolsCount; j++)
+                {
+                    var character = random.Next(asciiLimit);
+                    userName += (char)character;
+                }
+                appDbContext.Users.Add(new ApplicationUser
+                {
+                    UserName = userName,
+                    RecordScore = score,
+                });
+            }
+
+		}
 
         void AddBoostIfNotExist(string name, long price, long profit, bool isAuto = false)
         {

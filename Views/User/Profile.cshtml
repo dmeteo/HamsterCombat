@@ -1,0 +1,18 @@
+﻿@using CSharpClicker.UseCases.GetUserProfile;
+@using CSharpClicker.Domain;
+@model UserProfileDto;
+
+@{
+	Layout = "~/Views/Shared/_HatLayout.cshtml";
+}
+
+<h1>@Model.UserName</h1>
+@if (Model.Avatar.Length == 0)
+{
+	<img src="~/anonymous.png" height="20" />
+}
+else
+{
+	<img src="data:image/png;base64, @Convert.ToBase64String(Model.Avatar)" height="20" width="20" />
+}
+<h4>@Model.RecordScore</h4>
